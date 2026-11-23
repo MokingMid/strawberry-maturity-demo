@@ -11,29 +11,28 @@ dist/
 venv/
 env/
 
-# ---------- 璁粌浜х墿 / 缂撳瓨 ----------
+# ---------- 训练产物 / 缓存 ----------
 work/
 work_archive/
 work_merged/
 runs/
 *.log
+*.err
 .cache/
 .pytest_cache/
 .coverage
 htmlcov/
 
-# ---------- 缃戠珯杩愯鏃?----------
+# ---------- 网站运行时 ----------
 demo/web/uploads/
 demo/web/results/
-demo/web/server.log
-demo/web/server.err
 
-# ---------- 妯″瀷杈撳嚭 ----------
+# ---------- 模型输出 ----------
 *.onnx
 *.engine
 *.torchscript
 
-# ---------- 缂栬緫鍣?/ 绯荤粺 ----------
+# ---------- 编辑器 / 系统 ----------
 .vscode/
 .idea/
 *.swp
@@ -41,9 +40,7 @@ demo/web/server.err
 Thumbs.db
 desktop.ini
 
-# ---------- 澶ф枃浠朵笌鏁版嵁闆嗭紙涓嶉殢浠撳簱鍒嗗彂锛?---------
+# ---------- 大文件与数据集（不随仓库分发）----------
 datasets/
 *.zip
 *.tar.gz
-!docs/**/*.png
-

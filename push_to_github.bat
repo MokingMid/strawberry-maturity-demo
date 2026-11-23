@@ -5,8 +5,9 @@ setlocal enabledelayedexpansion
 REM ==============================================================
 REM  推送到 GitHub
 REM
-REM  用法:  push_to_github.bat  <GitHub用户名>
-REM  例:    push_to_github.bat  yourname
+REM  用法:  push_to_github.bat
+REM
+REM  仓库: https://github.com/MokingMid/strawberry-maturity-demo
 REM
 REM  前置条件：
 REM    1) 已在 https://github.com/new 建好空仓库 strawberry-maturity-demo
@@ -18,17 +19,7 @@ REM        不用手动粘贴 Token。
 REM ==============================================================
 
 set "REPO_DIR=%~dp0"
-set "GITHUB_USER=%~1"
-
-if "%GITHUB_USER%"=="" (
-    echo.
-    echo [错误] 请提供 GitHub 用户名
-    echo 用法: %~nx0 yourname
-    echo.
-    pause
-    exit /b 1
-)
-
+set "GITHUB_USER=MokingMid"
 set "REPO_NAME=strawberry-maturity-demo"
 set "REPO_URL=https://github.com/%GITHUB_USER%/%REPO_NAME%.git"
 
@@ -37,6 +28,7 @@ cd /d "%REPO_DIR%"
 echo.
 echo ==============================================================
 echo   仓库: %REPO_URL%
+echo   Pages: https://%GITHUB_USER%.github.io/%REPO_NAME%/
 echo ==============================================================
 echo.
 
@@ -76,9 +68,9 @@ echo.
 echo [3/3] 推送完成
 echo.
 echo ==============================================================
-echo   接下来三步：
+echo   接下来两步：
 echo.
-echo   1) 开启 GitHub Pages  ^(静态展示站, 立即可访问^)
+echo   1) 开启 GitHub Pages ^(静态展示站, 约 2 分钟自动发布^)
 echo      https://github.com/%GITHUB_USER%/%REPO_NAME%/settings/pages
 echo      Source 选 "GitHub Actions", 保存
 echo      访问: https://%GITHUB_USER%.github.io/%REPO_NAME%/
@@ -86,10 +78,6 @@ echo.
 echo   2) 部署实时推理网站 ^(Flask, 可上传图片跑推理^)
 echo      https://render.com/deploy   ->  选本仓库 -> Apply
 echo      访问: https://strawberry-maturity-demo.onrender.com
-echo.
-echo   3) 把 README.md 与 site/index.html 里的 OWNER 占位符
-echo      换成你的用户名, 然后重新提交推送
-echo.
 echo ==============================================================
 echo.
 pause

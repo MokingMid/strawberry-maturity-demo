@@ -4,12 +4,12 @@
 
 **YOLO 检测 + ResNet18 三状态分类**（成熟 / 半熟 / 未熟）
 
-[![CI](https://github.com/OWNER/strawberry-maturity-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/strawberry-maturity-demo/actions/workflows/ci.yml)
-[![Pages](https://github.com/OWNER/strawberry-maturity-demo/actions/workflows/pages.yml/badge.svg)](https://github.com/OWNER/strawberry-maturity-demo/actions/workflows/pages.yml)
+[![CI](https://github.com/MokingMid/strawberry-maturity-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/MokingMid/strawberry-maturity-demo/actions/workflows/ci.yml)
+[![Pages](https://github.com/MokingMid/strawberry-maturity-demo/actions/workflows/pages.yml/badge.svg)](https://github.com/MokingMid/strawberry-maturity-demo/actions/workflows/pages.yml)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-[在线展示](https://owner.github.io/strawberry-maturity-demo/) ·
+[在线展示](https://MokingMid.github.io/strawberry-maturity-demo/) ·
 [快速开始](#-快速开始) · [实测指标](#-实测指标) · [仓库结构](#-仓库结构)
 
 </div>
@@ -39,7 +39,7 @@
 ### 方式一：Docker（推荐，跨平台）
 
 ```bash
-git clone https://github.com/OWNER/strawberry-maturity-demo.git
+git clone https://github.com/MokingMid/strawberry-maturity-demo.git
 cd strawberry-maturity-demo
 docker build -t strawberry-demo .
 docker run -p 8000:8000 strawberry-demo
@@ -49,7 +49,7 @@ docker run -p 8000:8000 strawberry-demo
 ### 方式二：本地 Python
 
 ```bash
-git clone https://github.com/OWNER/strawberry-maturity-demo.git
+git clone https://github.com/MokingMid/strawberry-maturity-demo.git
 cd strawberry-maturity-demo
 
 python -m venv .venv

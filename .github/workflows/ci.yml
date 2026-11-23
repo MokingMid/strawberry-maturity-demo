@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Demo smoke test (import + model paths)
+        run: |
+          python -c "
+          import sys; sys.path.insert(0, 'demo')
+          from paths import find_weights, images_dir
+          d, c = find_weights('detector'), find_weights('classifier')
+          assert d and d.exists(), d
+          assert c and c.exists(), c
+          assert images_dir('v1') and images_dir('v1').is_dir()
+          print('detector  ->', d)
+          print('classifier->', c)
+          print('samples   ->', images_dir('v1'))
+          print('SMOKE OK')
+          "
+
+      - name: CLI check
+        run: python -m strawberry_cv.cli check

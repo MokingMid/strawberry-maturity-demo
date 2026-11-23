@@ -1,0 +1,11 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://100.65.54.194:8000
+Press CTRL+C to quit
+127.0.0.1 - - [23/Nov/2026 23:17:19] "GET /api/samples?dataset=archive&size=2 HTTP/1.1" 200 -
+127.0.0.1 - - [23/Nov/2026 23:17:19] "GET /api/samples?dataset=v1&size=2 HTTP/1.1" 200 -
+127.0.0.1 - - [23/Nov/2026 23:17:30] "GET /api/batch?dataset=archive&count=3 HTTP/1.1" 200 -
+127.0.0.1 - - [23/Nov/2026 23:17:34] "GET /health HTTP/1.1" 404 -
+127.0.0.1 - - [23/Nov/2026 23:17:38] "GET /api/sample/v1/image_012.jpg?detector=merged&classifier=merged&conf=0.55&iou=0.5 HTTP/1.1" 404 -
+127.0.0.1 - - [23/Nov/2026 23:17:41] "GET /api/sample/v1/image_025.jpg?detector=merged&classifier=merged&conf=0.55&iou=0.5 HTTP/1.1" 404 -

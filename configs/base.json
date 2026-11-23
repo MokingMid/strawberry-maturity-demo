@@ -1,0 +1,125 @@
+{
+  "project": {
+    "name": "strawberry_cv",
+    "seed": 42
+  },
+  "paths": {
+    "data_root": "samples/v1",
+    "images": "samples/v1/detection/images",
+    "labels": "samples/v1/detection/labels",
+    "scene_manifest": "samples/v1/manifests/scene_groups.csv",
+    "archive_data_root": "samples/archive",
+    "archive_images": "samples/archive/detection/images",
+    "archive_labels": "samples/archive/detection/labels",
+    "archive_scene_manifest": "samples/archive/manifests/scene_groups.csv",
+    "work_dir": "work"
+  },
+  "detector": {
+    "weights": "models/detector_merged.pt",
+    "imgsz": 640,
+    "epochs": 120,
+    "batch": 8,
+    "patience": 40,
+    "device": "auto",
+    "workers": 0,
+    "conf": 0.55,
+    "iou": 0.5,
+    "max_det": 100,
+    "num_classes": 1,
+    "class_name": "strawberry",
+    "project_name": "detector",
+    "run_name": "merged_1cls_lowlr",
+    "train_args": {
+      "lr0": 0.001,
+      "optimizer": "AdamW",
+      "cos_lr": true,
+      "warmup_epochs": 5.0,
+      "seed": 42
+    }
+  },
+  "classifier": {
+    "arch": "resnet18",
+    "pretrained": true,
+    "num_classes": 3,
+    "imgsz": 224,
+    "epochs": 30,
+    "batch": 32,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "class_weights": "balanced",
+    "patience": 8,
+    "workers": 0,
+    "device": "auto",
+    "run_name": "resnet18_3cls_merged"
+  },
+  "roi": {
+    "pad_ratio": 0.12,
+    "square": true,
+    "min_size": 32,
+    "skip_border": true,
+    "max_neighbor_iou": 0.1,
+    "pad_steps": 6
+  },
+  "split": {
+    "ratios": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "seed": 42
+  },
+  "augment": {
+    "hsv_h": 0.015,
+    "hsv_s": 0.3,
+    "hsv_v": 0.3,
+    "fliplr": 0.5,
+    "flipud": 0.0,
+    "scale": 0.3,
+    "translate": 0.1,
+    "mosaic": 0.5,
+    "mixup": 0.0
+  },
+  "traditional": {
+    "feature_size": 128,
+    "color_bins": 32,
+    "glcm_levels": 32,
+    "glcm_distances": [
+      1,
+      2,
+      4
+    ],
+    "glcm_angles": [
+      0,
+      45,
+      90,
+      135
+    ],
+    "lbp_points": 8,
+    "lbp_radius": 1,
+    "svm_c": [
+      0.1,
+      1,
+      10
+    ],
+    "svm_gamma": [
+      "scale",
+      0.001,
+      0.01
+    ],
+    "cv_folds": 3
+  },
+  "tracking": {
+    "iou_threshold": 0.3,
+    "max_age": 30,
+    "min_hits": 3,
+    "debounce": 3
+  },
+  "inference": {
+    "conf": 0.55,
+    "iou": 0.5,
+    "device": "auto",
+    "save_csv": true,
+    "save_video": true
+  }
+}

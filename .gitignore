@@ -1,0 +1,48 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---------- 训练产物 / 缓存 ----------
+work/
+work_archive/
+work_merged/
+runs/
+*.log
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ---------- 网站运行时 ----------
+demo/web/uploads/
+demo/web/results/
+demo/web/server.log
+demo/web/server.err
+
+# ---------- 模型输出 ----------
+*.onnx
+*.engine
+*.torchscript
+
+# ---------- 编辑器 / 系统 ----------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 大文件与数据集（不随仓库分发）----------
+datasets/
+*.zip
+*.tar.gz
+!docs/**/*.png

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>草莓成熟度检测 Demo</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="logo">🍓</span>
+    <div>
+      <h1>草莓成熟度检测 Demo</h1>
+      <p class="sub">YOLO 检测 → ResNet18 成熟度三分类 · 成熟 / 半熟 / 未熟</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="play">▶ 单张分析</button>
+    <button class="tab" data-tab="samples">🖼 数据集浏览</button>
+    <button class="tab" data-tab="batch">📊 批量评测</button>
+    <button class="tab" data-tab="metrics">📈 模型指标</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ 单张分析 ============ -->
+  <section class="tab-panel active" id="tab-play">
+    <div class="grid-2">
+      <div class="card">
+        <h2>输入</h2>
+
+        <div class="seg" id="src-toggle">
+          <button class="seg-btn active" data-src="upload">上传图片</button>
+          <button class="seg-btn" data-src="dataset">数据集样例</button>
+        </div>
+
+        <div class="src-panel active" id="src-upload">
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept="image/*" hidden>
+            <span class="dz-icon">📤</span>
+            <span class="dz-text">点击选择图片，或把文件拖到这里</span>
+            <span class="dz-hint">支持 jpg / png / bmp / webp，最大 32MB</span>
+          </label>
+          <div id="upload-preview" class="preview hidden">
+            <img id="upload-thumb" alt="预览">
+            <button class="link-btn" id="clear-upload">移除</button>
+          </div>
+        </div>
+
+        <div class="src-panel" id="src-dataset">
+          <label class="field">
+            <span>数据集</span>
+            <select id="pick-dataset"></select>
+          </label>
+          <label class="field">
+            <span>样例图片</span>
+            <select id="pick-sample"></select>
+          </label>
+          <button class="btn ghost" id="pick-random">随机换一张</button>
+        </div>
+
+        <h3>推理参数</h3>
+        <div class="params">
+          <label class="field">
+            <span>检测阈值 conf <b id="conf-val">0.55</b></span>
+            <input type="range" id="conf" min="0.10" max="0.90" step="0.05" value="0.55">
+          </label>
+          <label class="field">
+            <span>NMS IoU <b id="iou-val">0.50</b></span>
+            <input type="range" id="iou" min="0.10" max="0.90" step="0.05" value="0.50">
+          </label>
+          <label class="field">
+            <span>检测器</span>
+            <select id="sel-detector">
+              <option value="merged">合并检测器（推荐，覆盖两个域）</option>
+              <option value="v1">v1 检测器（仅网络特写）</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>分类器</span>
+            <select id="sel-classifier">
+              <option value="merged">合并分类器（推荐）</option>
+              <option value="archive">归档集分类器</option>
+              <option value="v1">v1 分类器（half F1=0）</option>
+            </select>
+          </label>
+        </div>
+
+        <button class="btn primary block" id="btn-analyze">开始分析</button>
+        <div class="status" id="play-status"></div>
+      </div>
+
+      <div class="card" id="result-card">
+        <h2>结果</h2>
+        <div class="empty" id="result-empty">
+          <span class="empty-icon">🫐</span>
+          <p>选择一张图片开始分析</p>
+        </div>
+        <div class="hidden" id="result-body">
+          <div class="img-wrap">
+            <img id="result-image" alt="标注结果">
+          </div>
+          <div class="stats" id="result-stats"></div>
+          <div class="table-wrap">
+            <table id="result-table">
+              <thead><tr>
+                <th>#</th><th>状态</th><th>置信度</th><th>成熟</th><th>半熟</th><th>未熟</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="actions">
+            <a class="btn ghost" id="btn-download" download>下载标注图</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 数据集浏览 ============ -->
+  <section class="tab-panel" id="tab-samples">
+    <div class="card">
+      <div class="row between">
+        <h2>数据集样例</h2>
+        <div class="row">
+          <select id="browse-dataset"></select>
+          <button class="btn ghost" id="btn-browse">刷新</button>
+        </div>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <div class="row between">
+        <span class="muted" id="browse-info"></span>
+        <div class="row">
+          <button class="btn ghost" id="page-prev">上一页</button>
+          <button class="btn ghost" id="page-next">下一页</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="browse-detail" hidden>
+      <h2>选中图片的详细结果</h2>
+      <div class="img-wrap">
+        <img id="browse-image" alt="标注结果">
+      </div>
+      <div class="stats" id="browse-stats"></div>
+    </div>
+  </section>
+
+  <!-- ============ 批量评测 ============ -->
+  <section class="tab-panel" id="tab-batch">
+    <div class="card">
+      <h2>批量评测</h2>
+      <div class="row">
+        <label class="field inline">
+          <span>数据集</span>
+          <select id="batch-dataset"></select>
+        </label>
+        <label class="field inline">
+          <span>张数</span>
+          <input type="number" id="batch-count" value="12" min="1" max="60">
+        </label>
+        <label class="field inline">
+          <span>起始</span>
+          <input type="number" id="batch-offset" value="0" min="0">
+        </label>
+        <button class="btn primary" id="btn-batch">开始评测</button>
+      </div>
+      <div class="status" id="batch-status"></div>
+      <div class="stats" id="batch-stats"></div>
+      <div class="thumbs" id="batch-thumbs"></div>
+    </div>
+  </section>
+
+  <!-- ============ 模型指标 ============ -->
+  <section class="tab-panel" id="tab-metrics">
+    <div class="card">
+      <h2>分类器对比（纯分类，GT 框）</h2>
+      <div class="table-wrap"><table id="cls-table"></table></div>
+    </div>
+    <div class="card">
+      <h2>端到端对比（检测 + 分类）</h2>
+      <div class="table-wrap"><table id="e2e-table"></table></div>
+    </div>
+    <div class="card">
+      <h2>成果画廊</h2>
+      <img id="gallery-img" class="gallery" alt="成果画廊">
+    </div>
+  </section>
+
+</main>
+
+<div id="loading" class="loading hidden"><div class="spinner"></div><span id="loading-text">处理中…</span></div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

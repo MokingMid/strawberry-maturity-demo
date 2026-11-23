@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>草莓成熟度检测 Demo · Strawberry Maturity Detection</title>
+<meta name="description" content="YOLO 检测 + ResNet18 三状态分类的草莓成熟度检测系统：成熟 / 半熟 / 未熟。含可视化网站、命令行 Demo、训练管线。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="badge-row">
+      <span class="badge">🍓 计算机视觉</span>
+      <span class="badge">PyTorch · Ultralytics · Flask</span>
+      <span class="badge">两阶段：检测 → 分类</span>
+    </div>
+    <h1>草莓成熟度检测 Demo</h1>
+    <p class="lead">
+      YOLO 找出画面里的每一颗草莓，ResNet18 判定它是<b class="r">成熟</b>、<b class="h">半熟</b>还是<b class="u">未熟</b>，
+      并给出整图成熟度指数。基于两套自建数据集联合训练。
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#live">🚀 打开交互 Demo</a>
+      <a class="btn" href="#results">📊 看实测指标</a>
+      <a class="btn" href="#quickstart">⚡ 本地跑起来</a>
+    </div>
+    <div class="kpi">
+      <div class="kpi-item"><div class="kpi-num">100.0%</div><div class="kpi-lab">v1 域成熟度判断正确率</div></div>
+      <div class="kpi-item"><div class="kpi-num">92.5%</div><div class="kpi-lab">温室大棚域正确率</div></div>
+      <div class="kpi-item"><div class="kpi-num">.857</div><div class="kpi-lab">half 类 F1（合并模型）</div></div>
+      <div class="kpi-item"><div class="kpi-num">~250<span class="unit">ms</span></div><div class="kpi-lab">CPU 单图端到端耗时</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 交互 Demo ============ -->
+<section id="live" class="section">
+  <div class="wrap">
+    <h2 class="sec-title">🚀 交互式 Demo</h2>
+    <p class="sec-lead">
+      网页版支持：上传自己的图片 / 浏览数据集 630 张图 / 批量评测 / 模型指标对比。
+    </p>
+
+    <div class="live-card">
+      <div class="live-left">
+        <h3>在线体验（Flask 实时推理）</h3>
+        <p>
+          仓库内置 <code>Dockerfile</code> 与 <code>render.yaml</code>，
+          在 GitHub 仓库页点 <b>Deploy to Render</b> 按钮即可部署，几分钟后得到一个公网地址，
+          别人直接打开就能上传图片跑推理。
+        </p>
+        <div class="btn-row">
+          <!-- 部署时把这里换成实际地址 -->
+          <a class="btn primary" href="https://render.com/deploy?repo=https://github.com/OWNER/strawberry-maturity-demo" target="_blank" rel="noopener">
+            一键部署到 Render
+          </a>
+          <a class="btn" href="https://github.com/OWNER/strawberry-maturity-demo#quickstart" target="_blank" rel="noopener">
+            本地 Docker 部署
+          </a>
+        </div>
+        <p class="tip">
+          💡 免费版实例空闲 15 分钟会休眠，首次访问约需 1 分钟冷启动。
+        </p>
+      </div>
+      <div class="live-right">
+        <h3>离线演示（无需服务器）</h3>
+        <p>下面是实际运行结果，标注由模型直接生成：</p>
+        <div class="shots">
+          <figure>
+            <img src="assets/v1_image_001_demo.jpg" alt="网络单果特写结果">
+            <figcaption>网络单果特写 · 3 颗全判为成熟</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/archive_image_005_demo.jpg" alt="温室场景结果">
+            <figcaption>温室大棚 · 同时输出成熟 / 半熟 / 未熟</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 架构 ============ -->
+<section id="arch" class="section alt">
+  <div class="wrap">
+    <h2 class="sec-title">🔧 系统架构</h2>
+    <p class="sec-lead">两阶段流水线。检测负责"找"，分类负责"判"，职责分离让两个模型都能独立迭代。</p>
+
+    <div class="arch">
+      <div class="stage">
+        <div class="stage-num">1</div>
+        <div class="stage-body">
+          <h3>检测 · YOLO11n</h3>
+          <p>640×640 输入，输出草莓外接框。合并两套数据集训练（630 图 / 1917 框），覆盖网络特写与温室大棚两种域。</p>
+          <div class="tagrow"><span class="tag">val mAP50 .866</span><span class="tag">mAP50-95 .796</span></div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="stage">
+        <div class="stage-num">2</div>
+        <div class="stage-body">
+          <h3>裁剪 · ROI 提取</h3>
+          <p>按检测框裁单果，外扩 12% 并补成正方形；若外扩会带进邻果，就逐级收缩 padding，避免把邻居的颜色混进来。</p>
+          <div class="tagrow"><span class="tag">square crop</span><span class="tag">neighbor-aware</span></div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="stage">
+        <div class="stage-num">3</div>
+        <div class="stage-body">
+          <h3>分类 · ResNet18</h3>
+          <p>对每颗草莓的 ROI 做三分类（成熟 / 半熟 / 未熟），输出三类概率。合并两套 ROI 训练（1554 张）。</p>
+          <div class="tagrow"><span class="tag">val macro F1 .898</span><span class="tag">half F1 .841</span></div>
+        </div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="stage">
+        <div class="stage-num">4</div>
+        <div class="stage-body">
+          <h3>输出 · 统计与可视化</h3>
+          <p>按成熟度配色画框（成熟=红 / 半熟=橙 / 未熟=绿），输出三类数量、占比条、成熟度指数（成熟 1 / 半熟 .5 / 未熟 0 的加权平均）。</p>
+          <div class="tagrow"><span class="tag">CSV</span><span class="tag">JSON</span><span class="tag">标注图 / 视频</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 指标 ============ -->
+<section id="results" class="section">
+  <div class="wrap">
+    <h2 class="sec-title">📊 实测指标</h2>
+    <p class="sec-lead">下面每一行都是本仓库代码跑出来的，不是 PPT 上的数字。</p>
+
+    <h3 class="sub-title">端到端（真实检测框 + 分类，各 30 图）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>配置</th><th>网络特写域</th><th>温室大棚域</th><th>温室域检测 P / R</th></tr></thead>
+        <tbody>
+          <tr class="bad">
+            <td>v1 原版检测器 + v1 原版分类器</td>
+            <td>97.6%</td><td class="bad-cell">65.9%</td><td>.786 / .550</td>
+          </tr>
+          <tr>
+            <td>v1 原版检测器 + 合并分类器</td>
+            <td>100.0%</td><td>86.4%</td><td>.786 / .550</td>
+          </tr>
+          <tr class="good">
+            <td><b>合并检测器 + 合并分类器</b>（默认）</td>
+            <td class="good-cell">100.0%</td><td class="good-cell">92.5%</td><td><b>.838 / .838</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      原版分类器在温室域只有 65.9% —— 跨域崩溃。用归档集补上 247 个 half 框重训后恢复到 90.9%，
+      合并两集训练后两个域都不再崩。
+    </p>
+
+    <h3 class="sub-title">分类器对比（纯分类，GT 框）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>分类器</th><th>训练数据</th><th>v1 test</th><th>归档 test</th><th>half F1</th></tr></thead>
+        <tbody>
+          <tr class="bad">
+            <td>v1 原版</td><td>168 张 ROI（仅 11 个 half）</td><td>acc .960</td><td>acc .621</td><td class="bad-cell">.000</td>
+          </tr>
+          <tr>
+            <td>归档集</td><td>1386 张 ROI（247 个 half）</td><td>acc 1.000</td><td>acc .872</td><td>.788</td>
+          </tr>
+          <tr class="good">
+            <td><b>合并</b></td><td>1554 张 ROI</td><td class="good-cell">acc 1.000</td><td>acc .863</td><td class="good-cell">.773</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      ⚠️ <b>half 类是最难的部分</b>：v1 只有 11 个 half 框、3 个场景，原分类器学不到半熟，
+      推理时<b>永远不会输出「半熟」</b>。归档集把它补到 247 个框，F1 从 0 拉到 .79~.86。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 画廊 ============ -->
+<section id="gallery" class="section alt">
+  <div class="wrap">
+    <h2 class="sec-title">🖼 运行结果画廊</h2>
+    <p class="sec-lead">左上为网络单果特写，右下为温室大棚；每张左上角的标题条是自动生成的统计。</p>
+    <img class="gallery" src="assets/gallery.jpg" alt="运行结果画廊">
+  </div>
+</section>
+
+<!-- ============ 快速开始 ============ -->
+<section id="quickstart" class="section">
+  <div class="wrap">
+    <h2 class="sec-title">⚡ 快速开始</h2>
+
+    <div class="quick-grid">
+      <div class="qcard">
+        <h3>1️⃣ 在线用</h3>
+        <p>点上面的「一键部署到 Render」，或在仓库页点 <b>Deploy to Render</b>。</p>
+        <pre><code>git clone https://github.com/OWNER/strawberry-maturity-demo.git
+cd strawberry-maturity-demo
+docker build -t strawberry-demo .
+docker run -p 8000:8000 strawberry-demo</code></pre>
+      </div>
+      <div class="qcard">
+        <h3>2️⃣ 本地跑 CLI</h3>
+        <p>单图 / 批量 / 视频 / 摄像头，四种输入模式。</p>
+        <pre><code>pip install -r requirements.txt
+
+python demo/strawberry_demo.py \
+  --image samples/v1/detection/images/image_001.jpg \
+  --out demo_out
+
+python demo/strawberry_demo.py \
+  --folder samples/v1/detection/images --out demo_out
+
+python demo/strawberry_demo.py --camera 0 --gui</code></pre>
+      </div>
+      <div class="qcard">
+        <h3>3️⃣ 本地跑网站</h3>
+        <p>Flask 开发服务器，和 Render 上跑的是同一份代码。</p>
+        <pre><code>pip install -r requirements.txt
+python app.py
+# → http://127.0.0.1:8000</code></pre>
+      </div>
+      <div class="qcard">
+        <h3>4️⃣ 跑测试 / 复现指标</h3>
+        <p>31 个单元测试 + 两个评测脚本，指标可一键复算。</p>
+        <pre><code>python -m unittest discover -s tests -v
+
+python demo/tools/compare_classifiers.py
+python demo/tools/compare_end2end.py</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 数据集 ============ -->
+<section id="data" class="section alt">
+  <div class="wrap">
+    <h2 class="sec-title">📁 两套数据集</h2>
+    <p class="sec-lead">仓库只附带 20 张样例（含标注）；完整数据集因体积与第三方来源，不随仓库分发。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>数据集</th><th>场景</th><th>图片</th><th>标注框</th><th>ripe / half / unripe</th><th>划分</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>strawberry_v1</code></td><td>网络单果特写</td><td>64</td><td>183</td>
+            <td>76 / <b class="h">11</b> / 96</td><td>按 scene_group 划 45/10/9</td>
+          </tr>
+          <tr>
+            <td><code>strawberry_archive_v1</code></td><td>温室大棚连拍</td><td>566</td><td>1734</td>
+            <td>520 / <b class="h">247</b> / 967</td><td>按 scene_group 划 396/84/86</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note-box">
+      <h4>类别判定口径（两套数据集一致）</h4>
+      <ul>
+        <li><b class="r">ripe 成熟</b>：果面红色覆盖 <b>≥ 1/2</b>，整体呈红色或深红</li>
+        <li><b class="h">half 半熟</b>：有可见红色但覆盖 <b>&lt; 1/2</b>，典型是下半部转红、上半部青白</li>
+        <li><b class="u">unripe 未熟</b>：基本无红色 —— 青绿 / 白绿 / 乳白，可有淡粉晕</li>
+        <li>红色覆盖按<b>果面可见的红色区域</b>估计，不按检测框面积；青白过渡带、极淡粉色晕不算红色</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 目录 ============ -->
+<section id="layout" class="section">
+  <div class="wrap">
+    <h2 class="sec-title">📂 仓库结构</h2>
+    <div class="tree">
+      <pre><code>strawberry-maturity-demo/
+├─ app.py                    WSGI 入口（Render / gunicorn）
+├─ Dockerfile                CPU 版镜像
+├─ render.yaml               Render 蓝图（一键部署）
+├─ requirements.txt
+├─ models/
+│  ├─ detector_merged.pt     合并检测器（5.2 MB）
+│  └─ classifier_merged.pt   合并分类器（42.7 MB）
+├─ strawberry_cv/            算法代码（CLI / 数据 / 模型 / 训练 / 评测 / 推理）
+├─ demo/
+│  ├─ strawberry_demo.py     命令行 Demo 入口
+│  ├─ demo_core.py           两阶段推理 + 中文渲染 + 结果导出
+│  ├─ paths.py               跨布局的路径解析
+│  ├─ web/                   Flask 可视化网站
+│  ├─ tools/                 数据合并 / 模型对比 / 画廊生成
+│  └─ tests/                 回归测试
+├─ samples/                  20 张样例图 + 标注（网站开箱可用）
+├─ traditional_cv/           传统 CV 基线（HSV + GLCM + LBP + SVM）
+├─ configs/base.json         全部配置
+├─ docs/                     交接文档 / 数据审计 / 开题材料
+└─ site/                     GitHub Pages 静态展示站（本页）</code></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>🍓 草莓成熟度检测与分拣 · 课程设计项目</p>
+    <p class="muted">
+      两阶段：Ultralytics YOLO11n 检测 + torchvision ResNet18 分类 ·
+      数据集：自建 v1（网络特写）+ 归档集（温室大棚）·
+      指标均为本仓库代码实测
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

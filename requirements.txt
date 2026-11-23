@@ -1,0 +1,28 @@
+# 草莓成熟度检测 Demo —— 依赖
+#
+# 最小可运行集（网站 + CLI demo + 单元测试）：
+#   pip install -r requirements.txt
+#
+# 训练部分另需 ultralytics（已包含在下面）。
+
+# --- 基础 ---
+numpy>=1.26
+opencv-python>=4.9
+scikit-learn>=1.4
+matplotlib>=3.8
+Pillow>=10.0
+
+# --- 训练 / 推理 ---
+torch>=2.3
+torchvision>=0.18
+ultralytics>=8.3
+
+# --- 可视化网站 ---
+Flask>=3.0
+Werkzeug>=3.0
+
+# --- 可选：YAML 读写（用 configs/base.json 时不需要）---
+PyYAML>=6.0
+
+# --- 生产部署（Render 用 gunicorn）---
+gunicorn>=21.2

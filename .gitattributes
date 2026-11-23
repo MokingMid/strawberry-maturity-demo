@@ -1,0 +1,16 @@
+# 默认按文本处理，行尾统一为 LF（Windows / Linux 一致）
+* text=auto eol=lf
+
+# 二进制文件不做任何转换
+*.pt binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.pdf binary
+*.docx binary
+*.pptx binary
+*.zip binary
+*.mp4 binary
+*.joblib binary
+*.onnx binary

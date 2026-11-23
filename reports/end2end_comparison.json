@@ -1,0 +1,127 @@
+[
+  {
+    "model": "v1 原分类器",
+    "dataset": "v1",
+    "images": 30,
+    "state_acc": 0.975609756097561,
+    "state_correct": 80,
+    "state_total": 82,
+    "det_precision": 0.9761904761904762,
+    "det_recall": 0.9879518072289156,
+    "det_tp": 82,
+    "det_fp": 2,
+    "det_fn": 1,
+    "confusion": {
+      "ripe->ripe": 42,
+      "unripe->unripe": 35,
+      "half->half": 3,
+      "unripe->ripe": 2
+    },
+    "latency_ms": 207.6776433348035
+  },
+  {
+    "model": "v1 原分类器",
+    "dataset": "归档",
+    "images": 30,
+    "state_acc": 0.6590909090909091,
+    "state_correct": 29,
+    "state_total": 44,
+    "det_precision": 0.7857142857142857,
+    "det_recall": 0.55,
+    "det_tp": 44,
+    "det_fp": 12,
+    "det_fn": 36,
+    "confusion": {
+      "unripe->unripe": 15,
+      "ripe->ripe": 13,
+      "half->ripe": 12,
+      "half->unripe": 3,
+      "half->half": 1
+    },
+    "latency_ms": 131.01327998641258
+  },
+  {
+    "model": "归档集分类器",
+    "dataset": "v1",
+    "images": 30,
+    "state_acc": 0.9634146341463414,
+    "state_correct": 79,
+    "state_total": 82,
+    "det_precision": 0.9761904761904762,
+    "det_recall": 0.9879518072289156,
+    "det_tp": 82,
+    "det_fp": 2,
+    "det_fn": 1,
+    "confusion": {
+      "ripe->ripe": 40,
+      "unripe->unripe": 37,
+      "half->ripe": 1,
+      "half->half": 2,
+      "ripe->half": 2
+    },
+    "latency_ms": 158.15311998982602
+  },
+  {
+    "model": "归档集分类器",
+    "dataset": "归档",
+    "images": 30,
+    "state_acc": 0.9090909090909091,
+    "state_correct": 40,
+    "state_total": 44,
+    "det_precision": 0.7857142857142857,
+    "det_recall": 0.55,
+    "det_tp": 44,
+    "det_fp": 12,
+    "det_fn": 36,
+    "confusion": {
+      "unripe->unripe": 15,
+      "ripe->ripe": 13,
+      "half->half": 12,
+      "half->unripe": 1,
+      "half->ripe": 3
+    },
+    "latency_ms": 129.72086333902553
+  },
+  {
+    "model": "合并分类器",
+    "dataset": "v1",
+    "images": 30,
+    "state_acc": 1.0,
+    "state_correct": 82,
+    "state_total": 82,
+    "det_precision": 0.9761904761904762,
+    "det_recall": 0.9879518072289156,
+    "det_tp": 82,
+    "det_fp": 2,
+    "det_fn": 1,
+    "confusion": {
+      "ripe->ripe": 42,
+      "unripe->unripe": 37,
+      "half->half": 3
+    },
+    "latency_ms": 158.41262999068326
+  },
+  {
+    "model": "合并分类器",
+    "dataset": "归档",
+    "images": 30,
+    "state_acc": 0.8636363636363636,
+    "state_correct": 38,
+    "state_total": 44,
+    "det_precision": 0.7857142857142857,
+    "det_recall": 0.55,
+    "det_tp": 44,
+    "det_fp": 12,
+    "det_fn": 36,
+    "confusion": {
+      "unripe->unripe": 14,
+      "unripe->half": 1,
+      "ripe->ripe": 12,
+      "half->half": 12,
+      "half->unripe": 1,
+      "half->ripe": 3,
+      "ripe->half": 1
+    },
+    "latency_ms": 129.97508001280949
+  }
+]

@@ -297,15 +297,22 @@ def api_batch():
 
 @app.route("/api/stats")
 def api_stats():
-    """模型指标对比（读取已有的评测 JSON，不重新计算）。"""
+    """模型指标对比（读取已固化的评测 JSON，不重新计算）。"""
     out = {}
-    for name, rel in (
-        ("classifier", "demo_out/classifier_comparison.json"),
-        ("end2end", "demo_out/end2end_comparison.json"),
+    candidates = [
+        _ROOT / "reports",
+        _DEMO.parent / "demo_out",
+        _ROOT / "demo_out",
+    ]
+    for name, filename in (
+        ("classifier", "classifier_comparison.json"),
+        ("end2end", "end2end_comparison.json"),
     ):
-        path = _ROOT / rel
-        if path.exists():
-            out[name] = json.loads(path.read_text(encoding="utf-8"))
+        for folder in candidates:
+            path = folder / filename
+            if path.exists():
+                out[name] = json.loads(path.read_text(encoding="utf-8"))
+                break
     out["class_names"] = list(CLASS_NAMES)
     out["datasets"] = {k: v["label"] for k, v in DATASETS.items()}
     return jsonify(out)
@@ -313,10 +320,14 @@ def api_stats():
 
 @app.route("/api/gallery")
 def api_gallery():
-    path = _DEMO.parent / "demo_out" / "gallery.jpg"
-    if not path.exists():
-        abort(404)
-    return send_file(path)
+    for candidate in (
+        _ROOT / "site" / "assets" / "gallery.jpg",
+        _ROOT / "demo_out" / "gallery.jpg",
+        _DEMO.parent / "demo_out" / "gallery.jpg",
+    ):
+        if candidate.exists():
+            return send_file(candidate)
+    abort(404)
 
 
 @app.route("/results/<path:name>")

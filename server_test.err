@@ -9,3 +9,5 @@ Press CTRL+C to quit
 127.0.0.1 - - [23/Nov/2026 23:17:34] "GET /health HTTP/1.1" 404 -
 127.0.0.1 - - [23/Nov/2026 23:17:38] "GET /api/sample/v1/image_012.jpg?detector=merged&classifier=merged&conf=0.55&iou=0.5 HTTP/1.1" 404 -
 127.0.0.1 - - [23/Nov/2026 23:17:41] "GET /api/sample/v1/image_025.jpg?detector=merged&classifier=merged&conf=0.55&iou=0.5 HTTP/1.1" 404 -
+127.0.0.1 - - [23/Nov/2026 23:17:46] "GET /api/sample/v1/image_001.jpg?detector=merged&classifier=merged&conf=0.55&iou=0.5 HTTP/1.1" 200 -
+127.0.0.1 - - [23/Nov/2026 23:17:46] "GET /results/v1_image_001_demo.jpg HTTP/1.1" 200 -

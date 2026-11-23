@@ -1,4 +1,4 @@
-# ---------- Python ----------
+﻿# ---------- Python ----------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -11,7 +11,7 @@ dist/
 venv/
 env/
 
-# ---------- 训练产物 / 缓存 ----------
+# ---------- 璁粌浜х墿 / 缂撳瓨 ----------
 work/
 work_archive/
 work_merged/
@@ -22,18 +22,18 @@ runs/
 .coverage
 htmlcov/
 
-# ---------- 网站运行时 ----------
+# ---------- 缃戠珯杩愯鏃?----------
 demo/web/uploads/
 demo/web/results/
 demo/web/server.log
 demo/web/server.err
 
-# ---------- 模型输出 ----------
+# ---------- 妯″瀷杈撳嚭 ----------
 *.onnx
 *.engine
 *.torchscript
 
-# ---------- 编辑器 / 系统 ----------
+# ---------- 缂栬緫鍣?/ 绯荤粺 ----------
 .vscode/
 .idea/
 *.swp
@@ -41,8 +41,9 @@ demo/web/server.err
 Thumbs.db
 desktop.ini
 
-# ---------- 大文件与数据集（不随仓库分发）----------
+# ---------- 澶ф枃浠朵笌鏁版嵁闆嗭紙涓嶉殢浠撳簱鍒嗗彂锛?---------
 datasets/
 *.zip
 *.tar.gz
 !docs/**/*.png
+

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>草莓成熟度检测 · 浏览器端推理 Demo</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="wrap">
+    <a class="back" href="../">← 返回项目主页</a>
+    <h1>🍓 草莓成熟度检测 · 浏览器端推理</h1>
+    <p class="sub">
+      模型跑在<b>你的浏览器里</b>（ONNX Runtime Web / WASM），图片不会上传到任何服务器。
+      需要联网一次下载模型（约 32 MB），之后浏览器会缓存。
+    </p>
+    <div class="chips">
+      <span class="chip">成熟 = 红色覆盖 ≥ 1/2</span>
+      <span class="chip">半熟 = 有红色但 &lt; 1/2</span>
+      <span class="chip">未熟 = 基本无红色</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap demo-main">
+
+  <div class="demo-grid">
+    <!-- 左：输入 -->
+    <section class="card">
+      <h2>① 选择图片</h2>
+
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*" hidden>
+        <span class="drop-icon">📤</span>
+        <span class="drop-text">点击选择，或把图片拖进来</span>
+        <span class="drop-hint">也可以直接用下面的样例</span>
+      </label>
+
+      <h3>样例图片</h3>
+      <div class="samples" id="samples"></div>
+
+      <h3>参数</h3>
+      <div class="params">
+        <label class="field">
+          <span>检测阈值 conf <b id="confVal">0.55</b></span>
+          <input type="range" id="conf" min="0.15" max="0.90" step="0.05" value="0.55">
+        </label>
+        <label class="field">
+          <span>NMS IoU <b id="iouVal">0.50</b></span>
+          <input type="range" id="iou" min="0.20" max="0.90" step="0.05" value="0.50">
+        </label>
+      </div>
+
+      <button class="btn primary block" id="run" disabled>开始分析</button>
+      <div class="status" id="status">模型加载中…</div>
+      <div class="progress hidden" id="progress"><div class="bar" id="bar"></div></div>
+    </section>
+
+    <!-- 右：结果 -->
+    <section class="card">
+      <h2>② 结果</h2>
+      <div class="empty" id="empty">
+        <span class="empty-icon">🫐</span>
+        <p>选一张图片开始</p>
+      </div>
+      <div class="hidden" id="result">
+        <div class="canvas-wrap">
+          <canvas id="canvas"></canvas>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>状态</th><th>置信度</th><th>成熟</th><th>半熟</th><th>未熟</th>
+            </tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <a class="btn ghost" id="download" download="demo_result.jpg">下载标注图</a>
+      </div>
+    </section>
+  </div>
+
+  <section class="card info">
+    <h2>说明</h2>
+    <ul>
+      <li><b>完全本地推理</b>：ONNX Runtime Web（WASM），图片不会离开你的设备。</li>
+      <li><b>与 Python 端一致</b>：LetterBox、YOLO 解码、NMS、ROI 裁剪、分类预处理全部逐项对齐，
+          已在 test 集上验证成熟度判定 <b>17/17</b> 与 PyTorch 相同。</li>
+      <li><b>模型</b>：检测器 YOLO11n（fp32，10.1 MB）· 分类器 ResNet18（int8，10.8 MB，量化后精度损失 0.4%）。</li>
+      <li>需要 WebAssembly 支持的现代浏览器（Chrome / Edge / Firefox / Safari 16+）。</li>
+    </ul>
+  </section>
+</main>
+
+<script src="../ort/ort.wasm.min.js"></script>
+<script src="demo.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -24,7 +24,13 @@
 输入图 ──► YOLO11n 检测（找草莓）──► ROI 裁剪 ──► ResNet18 分类 ──► 成熟度标注 + 统计
 ```
 
-三种输出方式：**命令行 Demo**、**Flask 可视化网站**、**Docker 一键部署**。
+三种打开方式：
+
+| 方式 | 需要什么 | 适合谁 |
+|---|---|---|
+| **🌐 浏览器端 Demo** | 只要能打开网址 | 任何人 —— 模型跑在访客浏览器里，图片不外传 |
+| 🐍 命令行 Demo | Python 环境 | 本地批量处理、视频、摄像头 |
+| 🌐 服务端网站 | 部署一台服务器 | 需要批量评测、指标对比、GPU 加速 |
 
 ```
 成熟 = 红色覆盖 ≥ 1/2      ┐
@@ -90,6 +96,22 @@ python demo/strawberry_demo.py --self-test --dataset archive --with-detector
 ---
 
 ## 🌐 可视化网站
+
+### A. 浏览器端 Demo（零部署，推荐给访客）
+
+**<https://mokingmid.github.io/strawberry-maturity-demo/demo/>**
+
+模型转成 ONNX 后用 **ONNX Runtime Web（WASM）** 在访客浏览器里跑，**图片不会上传到任何服务器**：
+
+- 检测器 YOLO11n → ONNX fp32（10.1 MB）
+- 分类器 ResNet18 → ONNX **int8 静态量化**（42.6 MB → 10.8 MB，精度只损失 **0.4%**）
+- LetterBox、YOLO 解码、NMS、ROI 裁剪、分类预处理**逐项对齐 Python 端**
+  （自实现的 bilinear 与 cv2.INTER_LINEAR 同口径）
+
+实测成熟度判定 **17/17** 与 PyTorch 完全相同；单图推理约 **0.6~1.0 秒**（CPU/WASM）。
+首次访问需下载约 32 MB（模型 + WASM 运行时），之后浏览器缓存。
+
+### B. 服务端网站（Flask，支持 GPU 与批量）
 
 四个页面：
 
@@ -167,21 +189,27 @@ strawberry-maturity-demo/
 ├─ app.py                    WSGI 入口（Render / gunicorn）
 ├─ Dockerfile / render.yaml  部署
 ├─ models/
-│  ├─ detector_merged.pt     合并检测器（5.2 MB）
-│  └─ classifier_merged.pt   合并分类器（42.7 MB）
+│  ├─ detector_merged.pt           合并检测器 PyTorch（5.2 MB，服务端用）
+│  ├─ classifier_merged.pt         合并分类器 PyTorch（42.7 MB，服务端用）
+│  ├─ detector_merged.onnx         检测器 ONNX fp32（10.1 MB，浏览器端用）
+│  └─ classifier_merged_int8.onnx  分类器 ONNX int8（10.8 MB，浏览器端用）
 ├─ strawberry_cv/            算法代码（CLI / 数据 / 模型 / 训练 / 评测 / 推理）
 ├─ demo/
 │  ├─ strawberry_demo.py     命令行 Demo
 │  ├─ demo_core.py           两阶段推理 + 中文渲染 + 导出
 │  ├─ paths.py               跨布局路径解析
-│  ├─ web/                   Flask 可视化网站
-│  ├─ tools/                 数据合并 / 模型对比 / 画廊生成
+│  ├─ web/                   Flask 可视化网站（服务端版）
+│  ├─ tools/                 ONNX 导出 / 数据合并 / 模型对比 / 画廊生成
 │  └─ tests/                 回归测试
+├─ site/                     GitHub Pages 站点
+│  ├─ index.html             项目主页（静态展示）
+│  ├─ demo/                  🌐 浏览器端推理 Demo（ONNX Runtime Web）
+│  └─ ort/                   onnxruntime-web 运行时（本地托管，不依赖 CDN）
 ├─ samples/                  20 张样例图 + 标注
 ├─ traditional_cv/           传统 CV 基线（HSV + GLCM + LBP + SVM）
 ├─ configs/base.json
 ├─ docs/                     交接文档 / 数据审计 / 开题材料
-├─ site/                     GitHub Pages 静态展示站
+├─ reports/                  固化的评测指标 JSON（网站指标页直接读）
 └─ tests/                    31 个单元测试
 ```
 

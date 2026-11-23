@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "site/**"
+      - "models/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -22,12 +23,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: 汇总静态资源
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          # ONNX 模型与样例图放在仓库根，Pages 只发布 site/，这里一并复制
+          mkdir -p _site/models _site/samples
+          cp models/*.onnx _site/models/
+          cp -r samples/. _site/samples/
+          echo "发布内容："
+          du -sh _site
+          ls _site
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: _site
 
   deploy:
     needs: build

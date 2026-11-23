@@ -22,8 +22,8 @@
       并给出整图成熟度指数。基于两套自建数据集联合训练。
     </p>
     <div class="cta">
-      <a class="btn primary" href="#live">🚀 打开交互 Demo</a>
-      <a class="btn" href="#results">📊 看实测指标</a>
+      <a class="btn primary" href="demo/">🚀 浏览器端 Demo（直接试）</a>
+      <a class="btn" href="#live">📖 效果与指标</a>
       <a class="btn" href="#quickstart">⚡ 本地跑起来</a>
     </div>
     <div class="kpi">
@@ -40,19 +40,52 @@
   <div class="wrap">
     <h2 class="sec-title">🚀 交互式 Demo</h2>
     <p class="sec-lead">
-      网页版支持：上传自己的图片 / 浏览数据集 630 张图 / 批量评测 / 模型指标对比。
+      <b>浏览器端 Demo（推荐，零部署）</b>：模型跑在访客自己的浏览器里（ONNX Runtime Web / WASM），
+      图片不会上传到任何服务器 —— 打开网页就能上传图片、看成熟度判定。<br>
+      <b>服务端 Demo</b>：完整 Flask 应用（批量评测、指标对比、GPU 加速），需部署到服务器。
     </p>
 
     <div class="live-card">
       <div class="live-left">
-        <h3>在线体验（Flask 实时推理）</h3>
+        <h3>① 浏览器端（打开即用，无需任何部署）</h3>
         <p>
-          仓库内置 <code>Dockerfile</code> 与 <code>render.yaml</code>，
-          在 GitHub 仓库页点 <b>Deploy to Render</b> 按钮即可部署，几分钟后得到一个公网地址，
-          别人直接打开就能上传图片跑推理。
+          检测器 YOLO11n（fp32，10.1 MB）+ 分类器 ResNet18（int8，10.8 MB），
+          首次访问需下载约 32 MB（之后浏览器缓存）。
+          LetterBox、YOLO 解码、NMS、ROI 裁剪、分类预处理全部与 Python 端逐项对齐，
+          实测成熟度判定 <b>17/17</b> 与 PyTorch 相同。
         </p>
         <div class="btn-row">
-          <!-- 部署时把这里换成实际地址 -->
+          <a class="btn primary" href="demo/">进入浏览器端 Demo</a>
+        </div>
+        <p class="tip">
+          💡 图片全程留在本地，隐私友好；单图推理约 <b>0.6~1.0 秒</b>（CPU/WASM）。
+        </p>
+      </div>
+      <div class="live-right">
+        <h3>② 离线演示（模型实际输出）</h3>
+        <p>下面是实际运行结果，标注由模型直接生成：</p>
+        <div class="shots">
+          <figure>
+            <img src="assets/v1_image_001_demo.jpg" alt="网络单果特写结果">
+            <figcaption>网络单果特写 · 3 颗全判为成熟</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/archive_image_005_demo.jpg" alt="温室场景结果">
+            <figcaption>温室大棚 · 同时输出成熟 / 半熟 / 未熟</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <div class="live-card" style="margin-top:18px">
+      <div class="live-left">
+        <h3>③ 服务端（Flask，支持 GPU 与批量）</h3>
+        <p>
+          完整的 Flask 应用：单张分析、数据集浏览、批量评测、模型指标对比四个页面，
+          API 齐全。仓库内置 <code>Dockerfile</code> 与 <code>render.yaml</code>，
+          在 GitHub 仓库页点 <b>Deploy to Render</b> 即可部署，几分钟后得到一个公网地址。
+        </p>
+        <div class="btn-row">
           <a class="btn primary" href="https://render.com/deploy?repo=https://github.com/MokingMid/strawberry-maturity-demo" target="_blank" rel="noopener">
             一键部署到 Render
           </a>
@@ -65,18 +98,14 @@
         </p>
       </div>
       <div class="live-right">
-        <h3>离线演示（无需服务器）</h3>
-        <p>下面是实际运行结果，标注由模型直接生成：</p>
-        <div class="shots">
-          <figure>
-            <img src="assets/v1_image_001_demo.jpg" alt="网络单果特写结果">
-            <figcaption>网络单果特写 · 3 颗全判为成熟</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/archive_image_005_demo.jpg" alt="温室场景结果">
-            <figcaption>温室大棚 · 同时输出成熟 / 半熟 / 未熟</figcaption>
-          </figure>
-        </div>
+        <h3>服务端能做的更多</h3>
+        <ul class="feature-list">
+          <li>浏览数据集 630 张图，任意一张即时分析</li>
+          <li>批量评测：与 GT 一致率、检测 P/R</li>
+          <li>三个分类器 × 三个测试集的对比表</li>
+          <li>视频推理与目标追踪（CLI 方式）</li>
+          <li>可调检测器/分类器型号做对比</li>
+        </ul>
       </div>
     </div>
   </div>

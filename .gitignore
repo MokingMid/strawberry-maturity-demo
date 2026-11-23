@@ -28,9 +28,9 @@ demo/web/uploads/
 demo/web/results/
 
 # ---------- 模型输出 ----------
-*.onnx
 *.engine
 *.torchscript
+# 注意：models/ 下的 .onnx 是刻意提交的（浏览器端 Demo 需要），不要忽略
 
 # ---------- 编辑器 / 系统 ----------
 .vscode/

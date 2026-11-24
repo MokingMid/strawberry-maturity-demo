@@ -31,6 +31,8 @@ demo/web/results/
 *.engine
 *.torchscript
 # 注意：models/ 下的 .onnx 是刻意提交的（浏览器端 Demo 需要），不要忽略
+# 检测器不做 int8 量化：YOLO 头的 sigmoid 输出会被量化压成 0（mAP50 归零）
+models/detector_merged_int8.onnx
 
 # ---------- 编辑器 / 系统 ----------
 .vscode/

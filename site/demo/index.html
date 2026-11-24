@@ -32,12 +32,19 @@
     <section class="card">
       <h2>① 选择图片</h2>
 
-      <label class="drop" id="drop">
-        <input type="file" id="file" accept="image/*" hidden>
+      <!-- 用 div 而不是 label：label 会把点击再转发给 input，
+           叠加显式的 fileInput.click() 会导致文件选择框弹两次 -->
+      <div class="drop" id="drop">
+        <!-- 视觉隐藏但保留在无障碍树里（读屏用户与自动化工具都能定位） -->
+        <input type="file" id="file" accept="image/*" class="visually-hidden">
         <span class="drop-icon">📤</span>
         <span class="drop-text">点击选择，或把图片拖进来</span>
         <span class="drop-hint">也可以直接用下面的样例</span>
-      </label>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="pick-file">📁 选择图片</button>
+        <button class="btn" id="take-photo">📷 拍照</button>
+      </div>
 
       <h3>样例图片</h3>
       <div class="samples" id="samples"></div>
@@ -56,7 +63,13 @@
 
       <button class="btn primary block" id="run" disabled>开始分析</button>
       <div class="status" id="status">模型加载中…</div>
-      <div class="progress hidden" id="progress"><div class="bar" id="bar"></div></div>
+      <div class="progress hidden" id="progress">
+        <div class="bar" id="bar"></div>
+        <div class="progress-label" id="progressLabel">准备中…</div>
+      </div>
+      <button class="btn ghost block hidden" id="retry">重试加载模型</button>
+      <button class="btn ghost block" id="selfcheck" style="margin-top:8px">🔍 环境自检</button>
+      <div class="selfcheck" id="selfcheck-out"></div>
     </section>
 
     <!-- 右：结果 -->

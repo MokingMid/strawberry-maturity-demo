@@ -151,12 +151,8 @@ async function loadModels(force) {
   $('#run').disabled = true;
   hideRetry();
 
-  const steps = [
-    { label: '运行时', url: '../ort/ort-wasm-simd-threaded.wasm', size: 14.2 },
-    { label: '检测器', url: '../models/detector_merged.onnx', size: 10.1 },
-    { label: '分类器', url: '../models/classifier_merged_int8.onnx', size: 10.8 },
-  ];
-  const totalSize = steps.reduce((s, x) => s + x.size, 0);
+  const RUNTIME = 14.2, DET = 10.1, CLS = 10.8;
+  const TOTAL = RUNTIME + DET + CLS;
   let done = 0;
 
   try {
@@ -168,8 +164,8 @@ async function loadModels(force) {
       new URL('../ort/ort-wasm-simd-threaded.wasm', location.href).href,
       (got, total) => {
         const mb = (got / 1048576).toFixed(1);
-        setProgress((done + (total ? got / total : 1) * steps[0].size) / totalSize * 100,
-                    `运行时 ${mb} / ${steps[0].size} MB`);
+        setProgress((done + (total ? got / total : 1) * RUNTIME) / TOTAL * 100,
+                    `运行时 ${mb} / ${RUNTIME} MB`);
       },
       '运行时', 2);
 
@@ -178,33 +174,38 @@ async function loadModels(force) {
     ort.env.wasm.initTimeout = 180000;
     ort.env.logLevel = 'error';
 
-    // 2) 建检测器会话
-    done = steps[0].size;
-    setStatus('正在加载检测器…');
-    const detBuf = await loadModelBytes(
-      new URL('../models/detector_merged.onnx', location.href).href,
-      (got, total) => {
-        const mb = (got / 1048576).toFixed(1);
-        setProgress((done + (total ? got / total : 1) * steps[1].size) / totalSize * 100,
-                    `检测器 ${mb} / ${steps[1].size} MB`);
-      },
-      '检测器');
-    setProgress((done + steps[1].size) / totalSize * 100, `检测器 ${steps[1].size} MB`);
+    // 2) 两个模型并行下载（串行会白等一倍时间）
+    setStatus('正在下载模型…');
+    const detUrl = new URL('../models/detector_merged.onnx', location.href).href;
+    const clsUrl = new URL('../models/classifier_merged_int8.onnx', location.href).href;
+    let detGot = 0, clsGot = 0;
+
+    const detP = (got, total) => {
+      detGot = total ? got / total : 1;
+      setProgress((RUNTIME + detGot * DET + clsGot * CLS) / TOTAL * 100,
+                  `检测器 ${(got / 1048576).toFixed(1)} / ${DET} MB` +
+                  `　分类器 ${(clsGot * CLS).toFixed(1)} / ${CLS} MB`);
+    };
+    const clsP = (got, total) => {
+      clsGot = total ? got / total : 1;
+      setProgress((RUNTIME + detGot * DET + clsGot * CLS) / TOTAL * 100,
+                  `检测器 ${(detGot * DET).toFixed(1)} / ${DET} MB` +
+                  `　分类器 ${(got / 1048576).toFixed(1)} / ${CLS} MB`);
+    };
+
+    const [detBuf, clsBuf] = await Promise.all([
+      loadModelBytes(detUrl, detP, '检测器'),
+      loadModelBytes(clsUrl, clsP, '分类器'),
+    ]);
+    done = RUNTIME + DET + CLS;
+    setProgress((done) / TOTAL * 100, '模型下载完成');
+
+    // 3) 建会话（graph 优化比较耗时，给个明确提示）
+    setStatus('正在初始化模型（首次较慢）…');
     sessions.det = await ort.InferenceSession.create(detBuf, {
       executionProviders: ['wasm'], graphOptimizationLevel: 'all',
     });
-
-    // 3) 建分类器会话
-    done += steps[1].size;
-    setStatus('正在加载分类器…');
-    const clsBuf = await loadModelBytes(
-      new URL('../models/classifier_merged_int8.onnx', location.href).href,
-      (got, total) => {
-        const mb = (got / 1048576).toFixed(1);
-        setProgress((done + (total ? got / total : 1) * steps[2].size) / totalSize * 100,
-                    `分类器 ${mb} / ${steps[2].size} MB`);
-      },
-      '分类器');
+    setStatus('正在初始化分类器…');
     sessions.cls = await ort.InferenceSession.create(clsBuf, {
       executionProviders: ['wasm'], graphOptimizationLevel: 'all',
     });
